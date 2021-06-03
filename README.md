@@ -50,13 +50,13 @@ config.xml:
 ```
 // use as plain Promise
 async function checkForApplePayOrGooglePay(){
-    let isAvailable = await cordova.plugins.ApplePayGooglePay.canMakePayments()
+    let isAvailable = await cordova.plugins.GooglePay.canMakePayments()
 }
 
 // OR
 let available;
 
-cordova.plugins.ApplePayGooglePay.canMakePayments((r) => {
+cordova.plugins.GooglePay.canMakePayments((r) => {
   available = r
 })
 ```
@@ -72,7 +72,7 @@ let request = {
     currencyCode: "USD"
 }
 
-cordova.plugins.ApplePayGooglePay.makePaymentRequest(request, r => {
+cordova.plugins.GooglePay.makePaymentRequest(request, r => {
         // in success callback, raw response as encoded JSON is returned. Pass it to your payment processor as is.
       let responseString = r
 

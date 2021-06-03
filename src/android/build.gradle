@@ -1,12 +1,56 @@
+def searchFileInParents(target) {
+  def searchPath = target
+  for (int i = 0; i < 8; i++) {
+    println(searchPath)
+    def targetFile = file(searchPath)
+    if(!targetFile.canRead()) {
+      searchPath = '../' + searchPath;
+    } else {
+      return targetFile;
+    }
+  }
+  return null;
+}
 
-dependencies {
-    /* "play-services-wallet" is the only module needed for the Google Pay API and this sample app
-     but the "play-services" module can also be used.
-     The version provided is the minimum version required for the most recent major version of the
-     Google Pay API library. Your app may choose a dependency greater than the value below.
-     See https://developers.google.com/pay/api/android/guides/setup#dependencies for more info.
-     */
-      implementation 'com.google.android.gms:play-services-wallet:18.1.2'
-      implementation 'com.android.support:appcompat-v7:28.0.0'
-      implementation "net.sourceforge.streamsupport:streamsupport:1.5.1"	
+android {
+  // #1. Find (project)/config.xml file,
+  //     because ionic capacitor does not copy <preference> nodes
+  def configXmlFile = searchFileInParents("config.xml")
+
+  if (configXmlFile == null) {
+    // #2. Find (project)/app/src/main/res/xml/config.xml file,
+    //     cordova should copy <preference> to this file
+    configXmlFile = searchFileInParents("app/src/main/res/xml/config.xml")
+  }
+
+  if (configXmlFile == null) {
+    throw new GradleException("Can not find config.xml file.")
+  }
+
+  // parse xml file
+  def widget = new XmlParser().parse(configXmlFile)
+  if (widget.preference == null) {
+    throw new GradleException("widget is null.")
+  }
+  if (widget.preference.size() == 0) {
+    throw new GradleException("Please add '<preference name=\"GOOGLE_WALLET_SERVICES_VERSION\" />' to the config.xml file.")
+  }
+
+  Properties props = new Properties()
+  props.setProperty("GOOGLE_WALLET_SERVICES_VERSION", "17.0.0");
+
+  widget.preference.each { pref ->
+    def name = pref.attributes().name
+    def value = pref.attributes().value
+    println("name = " + name);
+    if (name == "GOOGLE_WALLET_SERVICES_VERSION") {
+      props.setProperty(name, value)
+    }
+  }
+
+  def PLAY_SERVICES_VERSION = props.get("GOOGLE_WALLET_SERVICES_VERSION")
+  println("---->GOOGLE_WALLET_SERVICES_VERSION = ${PLAY_SERVICES_VERSION}")
+  dependencies {
+    implementation "com.google.android.gms:play-services-wallet:${PLAY_SERVICES_VERSION}"
+  }
 }

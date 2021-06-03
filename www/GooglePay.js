@@ -8,11 +8,12 @@ var executeCallback = function(callback, message) {
 
 /**
  * Determines if the current device supports Apple Pay and has a supported card installed.
+ * @param {object} paymentDataRequest
  * @param {Function} [successCallback] - Optional success callback, recieves message object.
  * @param {Function} [errorCallback] - Optional error callback, recieves message object.
  * @returns {Promise}
  */
-exports.canMakePayments = function(successCallback, errorCallback) {
+exports.canMakePayments = function(paymentDataRequest, successCallback, errorCallback) {
     return new Promise(function(resolve, reject) {
         exec(function(message) {
             executeCallback(successCallback, message);
@@ -20,18 +21,18 @@ exports.canMakePayments = function(successCallback, errorCallback) {
         }, function(message) {
             executeCallback(errorCallback, message);
             reject(message);
-        }, 'ApplePayGooglePay', 'canMakePayments', []);
+        }, 'GooglePay', 'canMakePayments', [paymentDataRequest]);
     });
 };
 
 /**
  * Opens the Apple Pay sheet and shows the order information.
- * @param {object} order
+ * @param {object} paymentDataRequest
  * @param {Function} [successCallback] - Optional success callback, recieves message object.
  * @param {Function} [errorCallback] - Optional error callback, recieves message object.
  * @returns {Promise}
  */
-exports.makePaymentRequest = function(order, successCallback, errorCallback) {
+exports.makePaymentRequest = function(paymentDataRequest, successCallback, errorCallback) {
     return new Promise(function(resolve, reject) {
         exec(function(message) {
             executeCallback(successCallback, message);
@@ -39,6 +40,6 @@ exports.makePaymentRequest = function(order, successCallback, errorCallback) {
         }, function(message) {
             executeCallback(errorCallback, message);
             reject(message);
-        }, 'ApplePayGooglePay', 'makePaymentRequest', [order]);
+        }, 'GooglePay', 'makePaymentRequest', [paymentDataRequest]);
     });
 };
