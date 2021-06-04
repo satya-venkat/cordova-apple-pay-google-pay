@@ -1,46 +1,24 @@
-# Cordova Apple Pay and Google Pay integration
-This plugin is built as unified method for obtaining payment tokens to forward it to payment processor (eg Adyen,
-Stripe, Wayforpay, Liqpay etc).
-
-Plugin supports iOS 11-14. Tested properly with cordova 10, iOS 14.3 and android 11.
+# Cordova Google Pay integration
+This plugin is built as unified method for obtaining payment tokens to forward it to payment processor (eg Adyen, Stripe, Wayforpay etc).
 
 ## Installation
 
 ```
-cordova plugin add cordova-plugin-apple-pay-google-pay
+cordova plugin add https://github.com/satya-venkat/cordova-plugin-google-pay
 ```
 
-For Android, register and fill all required forms at https://pay.google.com/business/console. Add following to
-config.xml:
+For Android, register and fill all required forms at https://pay.google.com/business/console. Add following to config.xml:
 
 ```
-<config-file parent="/manifest/application" target="AndroidManifest.xml">
-    <meta-data
-            android:name="com.google.android.gms.wallet.api.enabled"
-            android:value="true" />
-</config-file>
-```
-
-For iOS, you have to have valid developer account with merchant set up and ApplePay capability and a merchant id
-configured in your Xcode project. Merchant id can be obtained
-from https://developer.apple.com/account/resources/identifiers/list/merchant. Do configuration manually or using
-config.xml:
-
-```
-<platform name="ios">
-
-  <config-file target="*-Debug.plist" parent="com.apple.developer.in-app-payments">
-    <array>
-      <string>developer merchant ID here</string>
-    </array>
+<widget ...>
+  <preference name="GOOGLE_WALLET_SERVICES_VERSION" value="(google servises verison used)" />
+  <preference name="SUPPORT_LIBRARY_VERSION" value="(support lib versions used)" />
+  <config-file parent="/manifest/application" target="AndroidManifest.xml">
+      <meta-data
+              android:name="com.google.android.gms.wallet.api.enabled"
+              android:value="true" />
   </config-file>
-
-  <config-file target="*-Release.plist" parent="com.apple.developer.in-app-payments">
-    <array>
-      <string>production merchant ID here</string>
-    </array>
-  </config-file>
-</platform>
+</widget>
 ```
 
 ## Usage
@@ -48,53 +26,108 @@ config.xml:
 `canMakePayments()` checks whether device is capable to make payments via Apple Pay or Google Pay.
 
 ```
-// use as plain Promise
-async function checkForApplePayOrGooglePay(){
-    let isAvailable = await cordova.plugins.GooglePay.canMakePayments()
+var requestObject = {
+  "apiVersion": 2,
+  "apiVersionMinor": 0,
+  "environment": "TEST",
+  "emailRequired": false,
+  "merchantInfo": {
+    "merchantName": "Example Merchant"
+  },
+  "allowedPaymentMethods": [
+    {
+      "type": "CARD",
+      "parameters": {
+        "allowedAuthMethods": [
+          "PAN_ONLY",
+          "CRYPTOGRAM_3DS"
+        ],
+        "allowedCardNetworks": [
+          "AMEX",
+          "DISCOVER",
+          "INTERAC",
+          "JCB",
+          "MASTERCARD",
+          "VISA"
+        ],
+        "billingAddressRequired": false
+      },
+      "tokenizationSpecification": {
+        "type": "PAYMENT_GATEWAY",
+        "parameters": {
+          "gatewayMerchantId": "",
+          "gateway": ""
+        }
+      }
+    }
+  ],
+  "transactionInfo": {
+    "currencyCode": "",
+    "countryCode": "",
+    "totalPriceStatus": "FINAL"
+  }
 }
 
-// OR
-let available;
+GooglePay.canMakePayments(
+  requestObject,
+  callbackSuccess,
+  callbackError,
+);
 
-cordova.plugins.GooglePay.canMakePayments((r) => {
-  available = r
-})
 ```
 
 `makePaymentRequest()` initiates pay session.
 
 ```
-let request = {
-    merchantId: 'merchant.com.example', // obtain it from https://developer.apple.com/account/resources/identifiers/list/merchant
-    purpose: `Payment for your order #1`,
-    amount: 100,
-    countryCode: "US",
-    currencyCode: "USD"
+var requestObject = {
+  "apiVersion": 2,
+  "apiVersionMinor": 0,
+  "environment": "TEST",
+  "emailRequired": false,
+  "merchantInfo": {
+    "merchantName": "Example Merchant"
+  },
+  "allowedPaymentMethods": [
+    {
+      "type": "CARD",
+      "parameters": {
+        "allowedAuthMethods": [
+          "PAN_ONLY",
+          "CRYPTOGRAM_3DS"
+        ],
+        "allowedCardNetworks": [
+          "AMEX",
+          "DISCOVER",
+          "INTERAC",
+          "JCB",
+          "MASTERCARD",
+          "VISA"
+        ],
+        "billingAddressRequired": false
+      },
+      "tokenizationSpecification": {
+        "type": "PAYMENT_GATEWAY",
+        "parameters": {
+          "gatewayMerchantId": "",
+          "gateway": ""
+        }
+      }
+    }
+  ],
+  "transactionInfo": {
+    "totalPrice": "",
+    "totalPriceLabel": "",
+    "currencyCode": "",
+    "countryCode": "",
+    "totalPriceStatus": "FINAL"
+  }
 }
 
-cordova.plugins.GooglePay.makePaymentRequest(request, r => {
-        // in success callback, raw response as encoded JSON is returned. Pass it to your payment processor as is.
-      let responseString = r
-
-      },
-      r => {
-        // in error callback, error message is returned.
-        // it will be "Payment cancelled" if used pressed Cancel button.
-      }
-   )
+GooglePay.makePaymentRequest(
+  requestObject,
+  callbackSuccess,
+  callbackError,
+);
 ```
 
-All parameters in request object are required.
-
-## For Android
-
-You will have to provide few extra parameters:
-
-```
-request.gateway = 'stripe'; // or any another processor you are using: https://developers.google.com/pay/api#participating-processors
-request.merchantId = 'XXXXXXX'; // merchant id provided by your processor
-request.gpMerchantName = 'Your Company Name'; // will be displayed in transaction info
-request.gpMerchantId = 'XXXXXXXXXXXX'; // obtain it at https://pay.google.com/business/console
-```
-
-Also, on Android checking payment availability calling `canMakePayments()` always returns false even if user has a valid card attached to GooglePay.
+Essentially the request object is the same object we provide to the web client of goole payments

@@ -5,7 +5,7 @@
 		xmlns="http://apache.org/cordova/ns/plugins/1.0">
 	<name>GooglePay</name>
 	<js-module name="GooglePay" src="www/GooglePay.js">
-		<clobbers target="cordova.plugins.GooglePay" />
+		<clobbers target="GooglePay" />
 	</js-module>
 	<platform name="android">
 		<config-file target="res/xml/config.xml" parent="/*">

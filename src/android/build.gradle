@@ -38,19 +38,24 @@ android {
 
   Properties props = new Properties()
   props.setProperty("GOOGLE_WALLET_SERVICES_VERSION", "17.0.0");
+  props.setProperty("SUPPORT_LIBRARY_VERSION", "27.1.1");
 
   widget.preference.each { pref ->
     def name = pref.attributes().name
     def value = pref.attributes().value
     println("name = " + name);
-    if (name == "GOOGLE_WALLET_SERVICES_VERSION") {
+    if (name == "GOOGLE_WALLET_SERVICES_VERSION" || name == "SUPPORT_LIBRARY_VERSION") {
       props.setProperty(name, value)
     }
   }
 
-  def PLAY_SERVICES_VERSION = props.get("GOOGLE_WALLET_SERVICES_VERSION")
+  def PLAY_SERVICES_VERSION = props.get("GOOGLE_WALLET_SERVICES_VERSION");
+  def SUPPORT_LIBRARY_VERSION = props.get("SUPPORT_LIBRARY_VERSION");
   println("---->GOOGLE_WALLET_SERVICES_VERSION = ${PLAY_SERVICES_VERSION}")
+  println("---->SUPPORT_LIBRARY_VERSION = ${SUPPORT_LIBRARY_VERSION}")
   dependencies {
     implementation "com.google.android.gms:play-services-wallet:${PLAY_SERVICES_VERSION}"
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}"
+    implementation "net.sourceforge.streamsupport:streamsupport:1.5.1"
   }
 }
